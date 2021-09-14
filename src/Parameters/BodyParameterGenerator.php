@@ -33,7 +33,7 @@ class BodyParameterGenerator implements ParameterGenerator
 
             $this->addToProperties($properties, $nameTokens, $paramRules);
 
-            if ($this->isParamRequired($paramRules)) {
+            if (is_array($paramRules) && $this->isParamRequired($paramRules)) {
                 $required[] = $param;
             }
         }
@@ -62,8 +62,12 @@ class BodyParameterGenerator implements ParameterGenerator
 
         if (!empty($nameTokens)) {
             $type = $this->getNestedParamType($nameTokens);
-        } else {
+        }
+        elseif(is_array($rules)) {
             $type = $this->getParamType($rules);
+        }
+        else {
+            $type = 'object';
         }
 
         if ($name === '*') {
@@ -101,14 +105,18 @@ class BodyParameterGenerator implements ParameterGenerator
             'type' => $type,
         ];
 
-        if ($enums = $this->getEnumValues($rules)) {
-            $propObj['enum'] = $enums;
-        }
+
 
         if ($type === 'array') {
             $propObj['items'] = [];
         } elseif ($type === 'object') {
             $propObj['properties'] = [];
+        }
+        else {
+            if($enums = $this->getEnumValues($rules)) {
+                $propObj['enum'] = $enums;
+            }
+
         }
 
         return $propObj;
