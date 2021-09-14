@@ -4,6 +4,7 @@ namespace Mtrajano\LaravelSwagger;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
+use InfyOm\Generator\Request\APIRequest;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionMethod;
 
@@ -189,14 +190,27 @@ class Generator
 
         $parameters = $action_instance->getParameters();
 
-        foreach ($parameters as $parameter) {
-            $class_name = $name = $parameter->getType() && !$parameter->getType()->isBuiltin()
-                ? new \ReflectionClass($parameter->getType()->getName())
-                : null;
 
-            if (is_subclass_of($class_name, FormRequest::class)) {
-                return (new $class_name)->rules();
+//        foreach ($parameters as $parameter) {
+//            $class_name = $name = $parameter->getType() && !$parameter->getType()->isBuiltin()
+//                ? new \ReflectionClass($parameter->getType()->getName())
+//                : null;
+//            dump($parameter->getType() === 'ReflectionUnionType');
+//            if (is_subclass_of($class_name, APIRequest::class)) {
+//                return (new $class_name)->rules();
+//            }
+//        }
+
+        foreach ($parameters as $parameter) {
+            if(!is_a($parameter->getType(), 'ReflectionUnionType'))
+            {
+                $class_name = $parameter->getType() ? $parameter->getType()->getName() : null;
+                if ($class_name && is_subclass_of($class_name, APIRequest::class)) {
+                    return (new $class_name)->rules();
+                }
             }
+
+
         }
 
         return [];
