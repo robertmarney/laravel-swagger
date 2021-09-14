@@ -10,7 +10,11 @@ trait GeneratesFromRules
     {
         if (is_string($rules)) {
             return explode('|', $rules);
-        } else {
+        }
+        if (is_subclass_of($rules, 'Rule')){
+            return [$rules::class];
+        }
+        else {
             return $rules;
         }
     }
@@ -36,11 +40,20 @@ trait GeneratesFromRules
         return in_array('required', $paramRules);
     }
 
+    protected function getMax(array $paramRules)
+    {
+        if(in_array('max', $paramRules))
+        {
+            return $paramRules['max'];
+        };
+        return null;
+    }
+
     protected function isArrayParameter($param)
     {
         return Str::contains($param, '*');
     }
-
+https://github.com/robertmarney/laravel-swagger/blob/master/src/Parameters/Concerns/GeneratesFromRules.php
     protected function getArrayKey($param)
     {
         return current(explode('.', $param));
